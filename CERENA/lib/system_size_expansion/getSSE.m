@@ -399,21 +399,24 @@ end
     %             end
     %         end
     
-    
-    idx_covar = 1;
-    for j = 1:System.state.number
-        for k = 1:j
-            covar_vol(idx_covar) = sqrt(System.state.volume(j))*sqrt(System.state.volume(k));
-            idx_covar = idx_covar+1;
+    if(any([EMREFLAG,IOSFLAG,LNAFLAG]))
+        idx_covar = 1;
+        for j = 1:System.state.number
+            for k = 1:j
+                covar_vol(idx_covar) = sqrt(System.state.volume(j))*sqrt(System.state.volume(k));
+                idx_covar = idx_covar+1;
+            end
         end
     end
     
-    idx_skew = 1;
-    for j = 1:System.state.number
-        for k = 1:j
-            for l = 1:k
-                skew_vol(idx_skew) = System.state.volume(j)*System.state.volume(k)*System.state.volume(l);
-                idx_skew = idx_skew+1;
+    if(any([EMREFLAG,IOSFLAG]))
+        idx_skew = 1;
+        for j = 1:System.state.number
+            for k = 1:j
+                for l = 1:k
+                    skew_vol(idx_skew) = System.state.volume(j)*System.state.volume(k)*System.state.volume(l);
+                    idx_skew = idx_skew+1;
+                end
             end
         end
     end

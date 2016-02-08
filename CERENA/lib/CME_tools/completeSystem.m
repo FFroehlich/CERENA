@@ -186,16 +186,23 @@ if isfield(System,'reaction')
             case 'microscopic'
                 for k = 1:length(System.reaction)
                     if any(S_e(:,k)>1)
-                        tmpRate = coeffs(System.reaction(k).propensity,symvar(System.reaction(k).educt));
+%                         tmpRate = coeffs(System.reaction(k).propensity,symvar(System.reaction(k).educt));
+                        tmpRate = System.reaction(k).propensity/prod(System.reaction(k).educt);
                         tmpInd = S_e(S_e(:,k)>1,k);
                         System.reaction(k).rate = tmpRate(end)*prod(factorial(tmpInd));
                     else
-                        System.reaction(k).rate = coeffs(System.reaction(k).propensity,symvar(System.reaction(k).educt));
+%                         System.reaction(k).rate = coeffs(System.reaction(k).propensity,symvar(System.reaction(k).educt));
+                        System.reaction(k).rate = System.reaction(k).propensity/prod(System.reaction(k).educt);
                     end
                 end
             case 'macroscopic'
                 for k = 1:length(System.reaction)
-                    System.reaction(k).rate = coeffs(System.reaction(k).propensity,symvar(System.reaction(k).educt));
+                    try
+%                         System.reaction(k).rate = coeffs(System.reaction(k).propensity,symvar(System.reaction(k).educt));
+                        System.reaction(k).rate = System.reaction(k).propensity/prod(System.reaction(k).educt);
+                    catch
+                        k
+                    end
                 end
         end
     end
@@ -254,7 +261,8 @@ if isfield(System,'reaction')
                     tmpProp = System.reaction(k).propensity;
                     tmpProp = subs(tmpProp,System.state.variable,System.state.variable.*System.state.volume);
                     System.reaction(k).propensity = tmpProp/System.state.volume(indEduc(1));
-                    System.reaction(k).rate = coeffs(System.reaction(k).propensity,symvar(System.reaction(k).educt));
+%                     System.reaction(k).rate = coeffs(System.reaction(k).propensity,symvar(System.reaction(k).educt));
+                    System.reaction(k).rate = System.reaction(k).propensity/prod(System.reaction(k).educt);
                 end
             case 'Macro_to_Micro'
                 for k = 1:length(System.reaction)
