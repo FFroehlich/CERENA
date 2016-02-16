@@ -5,7 +5,7 @@ if nargin >= 1
 else
     error('At least one input argument is required!')
 end
-options.sym_kappa = true;
+options.sym_kappa = false;
 if nargin >= 2
     options = setdefault(varargin{2},options);
 end
@@ -144,9 +144,7 @@ if isfield(System,'kappa')
         System.kappa.variable = transpose(System.kappa.variable);
     end
     if ~isfield(System.kappa,'name')
-        for i =1:length(System.kappa.variable)
-            System.kappa.name{i,1} = char(System.kappa.variable(i));
-        end
+        System.kappa.name = cellfun(@char,{System.kappa.variable},'UniformOutput',false);
     else
         tmpsize = size(System.kappa.name);
         if tmpsize(1)==1

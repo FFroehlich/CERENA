@@ -78,6 +78,8 @@ function System = importSBML(modelname)
     % Define parameter vector:
     n_p = length(model.parameter);
     str_par_name = '{''';
+    System.parameter.name = cell(n_p,1);
+    System.parameter.variable = sym('p',[n_p,1]);
     for i = 1:n_p
         isRule = false;
         for ii=1:length(model.rule)
@@ -101,6 +103,7 @@ function System = importSBML(modelname)
     str_par_name = [str_par_name(1:end-3),'};'];
     
     n_r = length(model.reaction);
+    rulevars = sym({model.rule.variable});
     for i = 1:n_r
         n_s_i = length(model.reaction(i).reactant);
         System.reaction(i).educt = sym({model.reaction(i).reactant.species});
@@ -127,17 +130,21 @@ function System = importSBML(modelname)
         
         % replace rules
         tmpProp = sym(tmpProp);
-        findrule = true;
+        vars = symvar(tmpProp);
+
+        ruleidx = ismember(rulevars,vars);
+        if(any(ruleidx))
+            findrule = true;
+        end
         while(findrule)
-            for jj=1:length(model.rule)
+            for jj=find(ruleidx)
                 tmpProp = subs(tmpProp, model.rule(jj).variable, ['(' model.rule(jj).formula ')']);
             end
             findrule = false;
             vars = symvar(tmpProp);
-            for jj=1:length(model.rule)
-                if(sum(ismember(vars, sym(model.rule(jj).variable)))>0) %R2013a compatible
-                    findrule = true;
-                end
+            ruleidx = ismember(rulevars,vars);
+            if(any(ruleidx))
+                findrule = true;
             end
         end
         tmpProp = char(tmpProp);
@@ -152,7 +159,7 @@ function System = importSBML(modelname)
                 tmpProp = strrep(tmpProp,model.compartment(j).id,model.compartment(j).size);
             end
         end
-        System.reaction(i).MacroscopicPropensity = tmpProp;
+        System.reaction(i).propensity = sym(tmpProp);
     end
     
     System.output.variable = transpose(System.state.variable);
@@ -165,6 +172,16 @@ function System = importSBML(modelname)
     System.input.number = 0;
     System.input.type     = {};
     System.input.name     = {};
+    
+    % fill parameters
+    svar = symvar([System.reaction.propensity]);
+    isState = ismember(symvar([System.reaction.propensity]),System.state.variable);
+    isParam = ismember(symvar([System.reaction.propensity]),System.parameter.variable);
+    isInput = ismember(symvar([System.reaction.propensity]),System.input.variable);
+    parsed_parameters = svar(not(isState) & not(isInput) & not(isParam));
+    System.parameter.variable = [System.parameter.variable, parsed_parameters];
+    System.parameter.name = {System.parameter.name, arrayfun(@char,parsed_parameters,'UniformOutput',false)};
+    
     
     %% Writing the model definition file
     clear([modelname '.m']);
@@ -206,7 +223,7 @@ function System = importSBML(modelname)
         else
             fprintf(fid, ['System.reaction(',num2str(ir),').product      = [', str_product,'];\n']);
         end
-        fprintf(fid, ['System.reaction(',num2str(ir),').propensity      = ', char(System.reaction(ir).MacroscopicPropensity),';\n\n']);
+        fprintf(fid, ['System.reaction(',num2str(ir),').propensity      = ', char(System.reaction(ir).propensity),';\n\n']);
     end
     str_output_var = char(System.output.variable);
     if length(str_output_var)>1

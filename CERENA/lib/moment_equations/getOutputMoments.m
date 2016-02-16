@@ -65,10 +65,7 @@ if nargin >= 8 && ~isempty(varargin{8})
 else
     if isfield(System,'kappa')
         n_kappa = length(System.kappa.variable);
-        c_kappa = sym(zeros(n_kappa,1));
-        for i = 1:n_kappa
-            c_kappa(i) = sym(['c_kappa' num2str(i,'%d')]);
-        end
+        c_kappa = sym('c_kappa',[n_kappa,1]);
     else
         c_kappa = [];
     end

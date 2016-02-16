@@ -70,7 +70,7 @@ elseif(strcmp(modeldir(1),'.'))
     modeldir = [ pwd modeldir(2:end) ];
 end
 
-tmpstr = which('cvodewrap.m');
+tmpstr = which('amiwrap.m');
 cvodewrap_flag = not(strcmp(tmpstr,''));
 if(cvodewrap_flag)
     disp('cvodewrap found in path! Will generate files')

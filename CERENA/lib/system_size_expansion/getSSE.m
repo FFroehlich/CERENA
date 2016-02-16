@@ -65,14 +65,16 @@ end
         f1(j) = -System.reaction(j).rate/2*prod(phi.^(s(:,j)-1).*s(:,j).*(s(:,j)-1));
     end
     
-    Di = sym(zeros(N,1));
-    D1i = sym(zeros(N,1));
-    for i = 1:N
-        Di(i) = sum(S(i,:).*f0);
-        D1i(i) = sum(S(i,:).*f1);
+    if(any([LNAFLAG,EMREFLAG,IOSFLAG]))
+        Di = sym(zeros(N,1));
+        D1i = sym(zeros(N,1));
+        for i = 1:N
+            Di(i) = sum(S(i,:).*f0);
+            D1i(i) = sum(S(i,:).*f1);
+        end
+        Di = simplify(Di);
+        D1i = simplify(D1i);
     end
-    Di = simplify(Di);
-    D1i = simplify(D1i);
     
     if(any([LNAFLAG,EMREFLAG,IOSFLAG]))
         Dij = sym(zeros(N,N));
